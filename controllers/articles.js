@@ -1,7 +1,7 @@
 const Article = require('../models/article');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
-const UnauthorizedError = require('../errors/unauthorized-err');
+// const UnauthorizedError = require('../errors/unauthorized-err');
 const ForbiddenError = require('../errors/forbidden-err');
 const { ERROR_MESSAGES, STATUS_CODES } = require('../utils/constants');
 
@@ -28,23 +28,24 @@ module.exports.createArticle = (req, res, next) => {
 };
 
 module.exports.deleteArticleById = (req, res, next) => {
-  Article.findByIdAndRemove(req.params.ArticleId)
+  Article.findById(req.params.articleId)
     .then((article) => {
-      if (article && req.user._id.toString() !== article.owner.toString()) {
-        throw new ForbiddenError(ERROR_MESSAGES.articleOwnedOnly);
-      }
-      if (article) {
-        res.status(STATUS_CODES.ok).send(article);
+      if (article && req.user._id.toString() === article.owner.toString()) {
+        Article.deleteOne(article)
+          .then((deletedArticle) => {
+            res.status(STATUS_CODES.ok).send(deletedArticle);
+          });
       } else if (!article) {
         throw new NotFoundError(ERROR_MESSAGES.articleNotFound);
       } else {
-        throw new UnauthorizedError(ERROR_MESSAGES.unauthorized);
+        throw new ForbiddenError(ERROR_MESSAGES.articleOwnedOnly);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new NotFoundError(ERROR_MESSAGES.articleNotFound);
       }
+      next(err);
     })
     .catch(next);
 };
