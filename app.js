@@ -11,7 +11,7 @@ const Joi = require('joi');
 const app = express();
 const jsonParser = bodyParser.json();
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3005 } = process.env;
 
 const { signin, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
