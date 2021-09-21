@@ -6,7 +6,7 @@ const ForbiddenError = require('../errors/forbidden-err');
 const { ERROR_MESSAGES, STATUS_CODES } = require('../utils/constants');
 
 module.exports.getArticles = (req, res, next) => {
-  Article.find({})
+  Article.find({owner:req.user._id})
     .then((article) => res.status(STATUS_CODES.ok).send(article))
     .catch(next);
 };
